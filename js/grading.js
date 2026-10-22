@@ -1,6 +1,6 @@
-import { $, $$, ri, rr, pick, shuffle, esc, store, hex, hx, grp, bits, SUB } from './util.js';
-import { REGS, DATA_BASE, regIdx, rn, ESC, numTok, stripComment, SPEC, HINT, classify, assemble, RunErr, run, memWord, traceComments } from './mips.js';
-import { TOPICS, TOPIC_KEYS, mc, tf, multi, num, match, order, code, P, BANK, toSigned, genConv, SCHEMES, valueIn, genSigned, genOps, genUnits, genAscii, T_REGS, traceQ, genTrace, genEndian, GEN } from './questions.js';
+import { $, shuffle, esc, hex, hx, grp, bits } from './util.js';
+import { DATA_BASE, regIdx, assemble, run, memWord } from './mips.js';
+import { mc, multi, num, match, order, code, P } from './questions.js';
 
 /* ================= grading ================= */
 function parseNum(s, base, any) {

@@ -1,5 +1,5 @@
-import { $, $$, ri, rr, pick, shuffle, esc, store, hex, hx, grp, bits, SUB } from './util.js';
-import { REGS, DATA_BASE, regIdx, rn, ESC, numTok, stripComment, SPEC, HINT, classify, assemble, RunErr, run, memWord, traceComments } from './mips.js';
+import { ri, rr, pick, shuffle, esc, hex, hx, grp, bits } from './util.js';
+import { regIdx, traceComments } from './mips.js';
 
 /* ================= topics ================= */
 const TOPICS = {
@@ -263,7 +263,7 @@ function genTrace() {
     const line = ['andi', 'ori', 'xori'].includes(op) ? `${op} $t0, $t1, 0x${rr(1, 255).toString(16).toUpperCase()}` : ['sll', 'srl'].includes(op) ? `${op}  $t0, $t1, ${rr(1, 4)}` : `${op}  $t0, $t1, $t2`;
     return traceQ('instr', `li   $t1, 0x${a.toString(16).toUpperCase()}\nli   $t2, 0x${b.toString(16).toUpperCase()}\n${line}`, '$t0'); }
   if (t === 2) { const a = rr(10, 120), b = rr(2, 12); const md = pick(['mult', 'div', 'div']); const g = pick(['mfhi', 'mflo']);
-    return traceQ('instr', `li   $t1, ${a}\nli   $t2, ${b}\n${md} $t1, $t2\n${g} $t0`, '$t0', md === 'div' ? '' : ''); }
+    return traceQ('instr', `li   $t1, ${a}\nli   $t2, ${b}\n${md} $t1, $t2\n${g} $t0`, '$t0'); }
   if (t === 3) { const arr = Array.from({ length: 5 }, () => rr(-30, 90)); const k = rr(0, 4), j = rr(0, 3);
     const v = pick([0, 1]);
     const src = v ? `.data\narr: .word ${arr.join(', ')}\n.text\nla   $t0, arr\nlw   $t1, ${4 * k}($t0)\naddi $t0, $t0, 4\nlw   $t2, ${4 * j}($t0)\nadd  $s0, $t1, $t2`
@@ -281,4 +281,4 @@ function genEndian() {
 }
 const GEN = { conv: [genConv], signed: [genSigned], ops: [genOps], units: [genUnits], ascii: [genAscii], instr: [genTrace], mem: [genTrace, genEndian] };
 
-export { TOPICS, TOPIC_KEYS, mc, tf, multi, num, match, order, code, P, BANK, toSigned, genConv, SCHEMES, valueIn, genSigned, genOps, genUnits, genAscii, T_REGS, traceQ, genTrace, genEndian, GEN };
+export { TOPICS, TOPIC_KEYS, mc, multi, num, match, order, code, P, BANK, genTrace, genEndian, GEN };

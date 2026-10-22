@@ -50,3 +50,12 @@ test('common mistakes get plain-English errors', () => {
   assert.match(firstError('lw $t0, $t1($t2)'), /must be a constant/);
   assert.match(firstError('2loop: add $t0, $t0, $t0'), /start with a digit/);
 });
+
+test('duplicate labels are reported', () => {
+  assert.match(assemble('.data\na: .word 1\na: .word 2').errors[0].msg, /defined twice/);
+});
+
+test('andi/ori/xori zero-extend a negative 16-bit constant', () => {
+  const p = assemble('li $t1, 0x12345678\nandi $t0, $t1, -1');
+  assert.equal(run(p).R[regIdx('$t0')], 0x5678);
+});

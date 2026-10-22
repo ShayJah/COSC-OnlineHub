@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BANK, GEN } from '../js/questions.js';
+import { BANK, GEN, TOPICS } from '../js/questions.js';
 import { prep, initState, grade } from '../js/grading.js';
 
 // Fill in the correct answer for a prepared question, the way a perfect student would.
@@ -37,4 +37,8 @@ test('a wrong code answer is rejected with a concrete counterexample', () => {
   for (let k = 0; k < 20 && grade(q, st); k++) st.res = null; // random i may be 0; retry
   assert.equal(grade(q, st), false);
   assert.match(st.res.msg, /expected \$s2 = -?\d+, but you got -?\d+/);
+});
+
+test('every question and generator uses a topic listed in TOPICS', () => {
+  for (const t of [...BANK.map(q => q.topic), ...Object.keys(GEN)]) assert.ok(t in TOPICS, `unknown topic: ${t}`);
 });

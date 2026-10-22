@@ -1,7 +1,7 @@
-import { $, $$, ri, rr, pick, shuffle, esc, store, hex, hx, grp, bits, SUB } from './util.js';
-import { REGS, DATA_BASE, regIdx, rn, ESC, numTok, stripComment, SPEC, HINT, classify, assemble, RunErr, run, memWord, traceComments } from './mips.js';
-import { TOPICS, TOPIC_KEYS, mc, tf, multi, num, match, order, code, P, BANK, toSigned, genConv, SCHEMES, valueIn, genSigned, genOps, genUnits, genAscii, T_REGS, traceQ, genTrace, genEndian, GEN } from './questions.js';
-import { parseNum, fmtAns, codeResult, prep, initState, answered, grade, TYPE_LABEL, typeLabel, explain } from './grading.js';
+import { $, $$, pick, shuffle, esc, store, hex, bits } from './util.js';
+import { REGS, DATA_BASE, rn, assemble, run, memWord } from './mips.js';
+import { TOPICS, TOPIC_KEYS, mc, multi, num, match, order, code, BANK, genTrace, genEndian, GEN } from './questions.js';
+import { prep, initState, answered, grade, typeLabel, explain } from './grading.js';
 
 /* ================= renderers ================= */
 function renderBody(q, st, el, locked, onChange) {

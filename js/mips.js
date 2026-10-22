@@ -1,4 +1,4 @@
-import { $, $$, ri, rr, pick, shuffle, esc, store, hex, hx, grp, bits, SUB } from './util.js';
+import { esc, hex } from './util.js';
 
 /* ================= MIPS assembler + simulator ================= */
 const REGS = ['zero', 'at', 'v0', 'v1', 'a0', 'a1', 'a2', 'a3', 't0', 't1', 't2', 't3', 't4', 't5', 't6', 't7', 's0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 't8', 't9', 'k0', 'k1', 'gp', 'sp', 'fp', 'ra'];
@@ -42,7 +42,7 @@ function classify(t, labels) {
 function assemble(src) {
   const errors = [], text = [], labels = {}, data = new Uint8Array(MEM_SIZE);
   let seg = 'text', dp = 0, pending = [];
-  const bind = addr => { pending.forEach(l => { if (labels[l] !== undefined) errors.push({ line: l.ln, msg: `Label “${l.name}” is defined twice.` }); labels[l.name] = addr; }); pending = []; };
+  const bind = addr => { pending.forEach(l => { if (labels[l.name] !== undefined) errors.push({ line: l.ln, msg: `Label “${l.name}” is defined twice.` }); labels[l.name] = addr; }); pending = []; };
   const pend = (name, ln) => pending.push({ name, ln });
   const put = (v, n) => { for (let k = 0; k < n; k++) { if (dp < MEM_SIZE) data[dp] = (v >>> (8 * k)) & 255; dp++; } };
   const align = n => { dp = Math.ceil(dp / n) * n; };
@@ -117,7 +117,7 @@ function run(prog, init = {}, onStep) {
   const R = new Int32Array(32); R[28] = 0x10008000; R[29] = 0x7FFFEFFC | 0;
   for (const k in init) R[regIdx(k)] = init[k] | 0;
   let hi = 0, lo = 0; const mem = prog.data.slice(); const warns = [];
-  const addrOf = (a, ln) => { const addr = a.k === 'l' ? prog.labels[a.name] : (R[a.base] + a.off) >>> 0; return addr; };
+  const addrOf = a => { const addr = a.k === 'l' ? prog.labels[a.name] : (R[a.base] + a.off) >>> 0; return addr; };
   const idx = (addr, n, ln, op) => {
     if (addr % n) throw new RunErr(ln, `${op}: address ${hex(addr)} is not a multiple of ${n}. ${n === 4 ? 'Words must be word-aligned.' : 'Half-words must be 2-aligned.'}`);
     const i = addr - DATA_BASE; if (i < 0 || i + n > MEM_SIZE) throw new RunErr(ln, `${op}: address ${hex(addr)} is outside the data segment. Did you la the base address first?`); return i;
@@ -125,7 +125,7 @@ function run(prog, init = {}, onStep) {
   const ovf = (v, ln, op) => { if (v > 2147483647 || v < -2147483648) throw new RunErr(ln, `Arithmetic overflow in ${op}. ${op} traps on signed overflow (the u-version does not).`); return v | 0; };
   let steps = 0;
   for (const ins of prog.text) {
-    if (++steps > 2000) break;
+    if (++steps > 2000) throw new RunErr(ins.ln, 'Program ran more than 2000 steps. Check for an infinite loop.');
     const { op, args, ln } = ins; const a = args; const r = j => R[a[j].v]; let d = a[0] && a[0].k === 'r' ? a[0].v : -1; let val;
     switch (op) {
       case 'add': val = ovf(r(1) + r(2), ln, op); break;
@@ -135,7 +135,7 @@ function run(prog, init = {}, onStep) {
       case 'addi': val = ovf(r(1) + (a[2].v | 0), ln, op); break;
       case 'addiu': val = (r(1) + a[2].v) | 0; break;
       case 'and': val = r(1) & r(2); break; case 'or': val = r(1) | r(2); break; case 'xor': val = r(1) ^ r(2); break; case 'nor': val = ~(r(1) | r(2)); break;
-      case 'andi': case 'ori': case 'xori': { const im = a[2].v >= 0 && a[2].v <= 0xFFFF ? a[2].v : a[2].v | 0; val = op === 'andi' ? r(1) & im : op === 'ori' ? r(1) | im : r(1) ^ im; break; }
+      case 'andi': case 'ori': case 'xori': { const im = a[2].v & 0xFFFF; val = op === 'andi' ? r(1) & im : op === 'ori' ? r(1) | im : r(1) ^ im; break; }
       case 'sll': val = r(1) << a[2].v; break; case 'srl': val = (r(1) >>> a[2].v) | 0; break; case 'sra': val = r(1) >> a[2].v; break;
       case 'slt': val = r(1) < r(2) ? 1 : 0; break;
       case 'not': val = ~r(1); break; case 'move': val = r(1); break;
@@ -178,4 +178,4 @@ function traceComments(src, init) {
   return { html: '<pre>' + lines.join('\n') + '</pre>', res };
 }
 
-export { REGS, DATA_BASE, regIdx, rn, ESC, numTok, stripComment, SPEC, HINT, classify, assemble, RunErr, run, memWord, traceComments };
+export { REGS, DATA_BASE, regIdx, rn, assemble, run, memWord, traceComments };
