@@ -1,0 +1,12 @@
+{
+  "name": "mips-drill",
+  "version": "1.0.0",
+  "description": "Practice tool for binary arithmetic and MIPS assembly with a built-in MIPS checker.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
